@@ -263,23 +263,29 @@
             if (tabName === 'list') {
                 ui.tabList.classList.remove('hidden');
                 ui.tabAdd.classList.add('hidden');
+                
                 ui.navBtnList.classList.add('text-blue-600');
                 ui.navBtnList.classList.remove('text-slate-500');
-                ui.navBtnList.querySelector('i').classList.replace('stroke-[1.5]', 'stroke-2');
+                const listIcon = ui.navBtnList.querySelector('svg, i');
+                if(listIcon) { listIcon.classList.remove('stroke-[1.5]'); listIcon.classList.add('stroke-2'); }
+                
                 ui.navBtnAdd.classList.remove('text-blue-600');
                 ui.navBtnAdd.classList.add('text-slate-500');
-                ui.navBtnAdd.querySelector('i').classList.replace('stroke-2', 'stroke-[1.5]');
-                lucide.createIcons();
+                const addIcon = ui.navBtnAdd.querySelector('svg, i');
+                if(addIcon) { addIcon.classList.remove('stroke-2'); addIcon.classList.add('stroke-[1.5]'); }
             } else {
                 ui.tabList.classList.add('hidden');
                 ui.tabAdd.classList.remove('hidden');
+                
                 ui.navBtnAdd.classList.add('text-blue-600');
                 ui.navBtnAdd.classList.remove('text-slate-500');
-                ui.navBtnAdd.querySelector('i').classList.replace('stroke-[1.5]', 'stroke-2');
+                const addIcon = ui.navBtnAdd.querySelector('svg, i');
+                if(addIcon) { addIcon.classList.remove('stroke-[1.5]'); addIcon.classList.add('stroke-2'); }
+                
                 ui.navBtnList.classList.remove('text-blue-600');
                 ui.navBtnList.classList.add('text-slate-500');
-                ui.navBtnList.querySelector('i').classList.replace('stroke-2', 'stroke-[1.5]');
-                lucide.createIcons();
+                const listIcon = ui.navBtnList.querySelector('svg, i');
+                if(listIcon) { listIcon.classList.remove('stroke-2'); listIcon.classList.add('stroke-[1.5]'); }
             }
         }
 
