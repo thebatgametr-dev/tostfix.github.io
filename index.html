@@ -156,8 +156,7 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ⚠️ DİKKAT: GITHUB PAGES İÇİN KENDİ FIREBASE AYARLARINI BURAYA YAPIŞTIRMALI SIN ⚠️
-        // Firebase'den aldığın ayarları aşağıdaki boş objenin içine yaz.
+        // Firebase Ayarları
         const myFirebaseConfig = {
             apiKey: "AIzaSyCX0GKxsXcZ6JElpPeDydoAJZlsZcL2Njs",
             authDomain: "teknofixsahatest.firebaseapp.com",
@@ -168,23 +167,7 @@
             measurementId: "G-ETB9EWG7Y5"
         };
 
-        // --- Firebase Başlatma ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' && Object.keys(__firebase_config).length > 0 ? JSON.parse(__firebase_config) : myFirebaseConfig;
-        
-        // Eğer ayarlar boşsa yükleme ekranı yerine hata göster (Sonsuz dönmeyi engeller)
-        if (!firebaseConfig.apiKey) {
-            const loadingScreen = document.getElementById('loading-screen');
-            loadingScreen.innerHTML = `
-                <div class="text-center p-6 bg-red-50 rounded-xl border border-red-200 max-w-[90%] mx-auto shadow-sm">
-                    <i data-lucide="alert-triangle" class="h-12 w-12 text-red-500 mx-auto mb-3"></i>
-                    <h3 class="text-lg font-bold text-red-700 mb-2">Veritabanı Ayarları Eksik!</h3>
-                    <p class="text-sm text-red-600 mb-4">Uygulamanın Github Pages üzerinde çalışması için kodun içindeki <b>myFirebaseConfig</b> kısmına kendi Firebase ayarlarınızı yapıştırmalısınız.</p>
-                </div>
-            `;
-            lucide.createIcons();
-            throw new Error("Lütfen kendi Firebase ayarlarınızı myFirebaseConfig içerisine ekleyin.");
-        }
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -211,7 +194,6 @@
             submitBtn: document.getElementById('submit-btn'),
             totalRecordsBadge: document.getElementById('total-records-badge'),
             
-            // Form inputları
             inpVaka: document.getElementById('vakaNo'),
             inpTarih: document.getElementById('tarih'),
             inpMusteri: document.getElementById('musteri'),
@@ -220,10 +202,7 @@
             inpDurum: document.getElementById('durum')
         };
 
-        // İkonları oluştur
         lucide.createIcons();
-        
-        // Form tarihini bugüne ayarla
         ui.inpTarih.value = new Date().toISOString().split('T')[0];
 
         // --- 1. Yetkilendirme ---
@@ -236,16 +215,12 @@
                 }
             } catch (error) {
                 console.error("Yetkilendirme hatası:", error);
-                // Sonsuz dönmeyi durdur, hatayı ekrana bas
                 ui.loadingScreen.innerHTML = `
                     <div class="text-center p-6 bg-red-50 rounded-xl border border-red-200 max-w-[90%] mx-auto shadow-sm">
-                        <i data-lucide="alert-triangle" class="h-12 w-12 text-red-500 mx-auto mb-3"></i>
                         <h3 class="text-lg font-bold text-red-700 mb-2">Giriş Hatası!</h3>
                         <p class="text-sm text-red-600 mb-4 font-mono">${error.message}</p>
-                        <p class="text-xs text-red-500 font-bold mt-2">Firebase Authentication > Settings > Authorized Domains kısmına Github linkini eklediğinden ve Anonim Girişi açtığından emin ol.</p>
                     </div>
                 `;
-                lucide.createIcons();
             }
         };
 
@@ -261,11 +236,12 @@
             }
         });
 
-        // --- 2. Veri Çekme ---
+        // --- 2. Veri Çekme (ARTIK ORTAK HAVUZ KULLANIYOR) ---
         function fetchRecords() {
             if (!currentUser) return;
             
-            const recordsRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'tasks');
+            // DİKKAT: 'users/uid/tasks' yerine tüm cihazlardan ulaşılan 'public/data/tasks' yaptık.
+            const recordsRef = collection(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri');
             
             onSnapshot(recordsRef, (snapshot) => {
                 const data = snapshot.docs.map(doc => ({
@@ -278,6 +254,7 @@
                 renderRecords();
             }, (error) => {
                 console.error("Veri çekme hatası:", error);
+                alert("Veriler çekilemedi! Hata: " + error.message);
             });
         }
 
@@ -286,30 +263,22 @@
             if (tabName === 'list') {
                 ui.tabList.classList.remove('hidden');
                 ui.tabAdd.classList.add('hidden');
-                
-                // Navigasyon stilleri
                 ui.navBtnList.classList.add('text-blue-600');
                 ui.navBtnList.classList.remove('text-slate-500');
                 ui.navBtnList.querySelector('i').classList.replace('stroke-[1.5]', 'stroke-2');
-                
                 ui.navBtnAdd.classList.remove('text-blue-600');
                 ui.navBtnAdd.classList.add('text-slate-500');
                 ui.navBtnAdd.querySelector('i').classList.replace('stroke-2', 'stroke-[1.5]');
-                
-                // İkonları yenile (stroke değişikliği algılanması için)
                 lucide.createIcons();
             } else {
                 ui.tabList.classList.add('hidden');
                 ui.tabAdd.classList.remove('hidden');
-                
                 ui.navBtnAdd.classList.add('text-blue-600');
                 ui.navBtnAdd.classList.remove('text-slate-500');
                 ui.navBtnAdd.querySelector('i').classList.replace('stroke-[1.5]', 'stroke-2');
-                
                 ui.navBtnList.classList.remove('text-blue-600');
                 ui.navBtnList.classList.add('text-slate-500');
                 ui.navBtnList.querySelector('i').classList.replace('stroke-2', 'stroke-[1.5]');
-                
                 lucide.createIcons();
             }
         }
@@ -333,16 +302,14 @@
             }
         }
 
-        // --- 4. Render (Çizdirme) Mantığı ---
+        // --- 4. Render (Çizdirme) ---
         function renderRecords() {
-            // Filtreleme
             const filtered = records.filter(record => 
                 (record.vakaNo && record.vakaNo.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (record.evrakNo && record.evrakNo.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (record.musteri && record.musteri.toLowerCase().includes(searchTerm.toLowerCase()))
             );
 
-            // Gruplama
             const groups = {};
             filtered.forEach(record => {
                 const date = record.tarih || 'Tarihsiz';
@@ -354,7 +321,6 @@
                 .sort((a, b) => new Date(b) - new Date(a))
                 .map(date => ({ date, records: groups[date] }));
 
-            // HTML Oluşturma
             if (groupedRecords.length === 0) {
                 ui.recordsContainer.innerHTML = `
                     <div class="text-center py-12 bg-white rounded-xl border border-slate-200 border-dashed">
@@ -439,23 +405,17 @@
             });
 
             ui.recordsContainer.innerHTML = html;
-            lucide.createIcons(); // İkonları HTML içine yerleştir
+            lucide.createIcons();
         }
 
-        // --- 5. Olay Dinleyicileri (Event Listeners) ---
-        
-        // Navigasyon geçişleri
+        // --- 5. Olay Dinleyicileri ---
         ui.navBtnList.addEventListener('click', () => switchTab('list'));
         ui.navBtnAdd.addEventListener('click', () => switchTab('add'));
 
-        // Arama işlemi
         ui.searchInput.addEventListener('input', (e) => {
             searchTerm = e.target.value;
-            if (searchTerm) {
-                ui.clearSearchBtn.classList.remove('hidden');
-            } else {
-                ui.clearSearchBtn.classList.add('hidden');
-            }
+            if (searchTerm) ui.clearSearchBtn.classList.remove('hidden');
+            else ui.clearSearchBtn.classList.add('hidden');
             renderRecords();
         });
 
@@ -471,14 +431,14 @@
             e.preventDefault();
             if (!currentUser) return;
             
-            // Butonu yükleniyor durumuna al
             const originalBtnHtml = ui.submitBtn.innerHTML;
             ui.submitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>';
             ui.submitBtn.disabled = true;
 
             try {
                 const newId = Date.now().toString();
-                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'tasks', newId);
+                // DİKKAT: Yeni "Ortak Havuz" kayıt yolumuz
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri', newId);
                 
                 await setDoc(docRef, {
                     vakaNo: ui.inpVaka.value,
@@ -487,17 +447,18 @@
                     aciklama: ui.inpAciklama.value,
                     evrakNo: ui.inpEvrak.value,
                     durum: ui.inpDurum.value,
-                    createdAt: Date.now()
+                    createdAt: Date.now(),
+                    createdBy: currentUser.uid // Kimin eklediğini arka planda tutalım
                 });
 
-                // Formu temizle ve listeye dön
                 ui.addForm.reset();
-                ui.inpTarih.value = new Date().toISOString().split('T')[0]; // Tarihi tekrar bugüne ayarla
+                ui.inpTarih.value = new Date().toISOString().split('T')[0];
                 switchTab('list');
                 
             } catch (error) {
                 console.error("Kaydetme hatası:", error);
-                alert("Kaydedilirken bir hata oluştu.");
+                // SADECE HATA DEĞİL, NEDENİNİ DE EKRANA BASIYORUZ
+                alert("Kaydedilemedi! Hata Detayı: " + error.message);
             } finally {
                 ui.submitBtn.innerHTML = originalBtnHtml;
                 ui.submitBtn.disabled = false;
@@ -505,7 +466,7 @@
             }
         });
 
-        // Silme İşlemleri (Event Delegation)
+        // Silme İşlemleri
         ui.recordsContainer.addEventListener('click', async (e) => {
             const btn = e.target.closest('button');
             if (!btn) return;
@@ -521,15 +482,14 @@
                 renderRecords();
             } else if (action === 'confirm-delete') {
                 if (!currentUser) return;
-                
                 btn.innerHTML = '<div class="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>';
-                
                 try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'tasks', id));
+                    // DİKKAT: Ortak havuzdan siliyoruz
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri', id));
                     deletingId = null;
-                    // Not: renderRecords() çağırmaya gerek yok, onSnapshot veriyi güncelleyecektir.
                 } catch (error) {
                     console.error("Silme hatası:", error);
+                    alert("Silinemedi! Hata: " + error.message);
                     deletingId = null;
                     renderRecords();
                 }
