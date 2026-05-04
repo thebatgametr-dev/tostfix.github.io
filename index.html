@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Saha Asistanı</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide İkonları -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Mobil cihazlarda alt çentik (safe area) boşlukları için */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+        
+        /* Form elemanları için genel düzeltmeler */
+        input, select, textarea { font-family: inherit; }
+        
+        /* Scrollbar gizleme (Daha şık görünüm) */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- YÜKLENİYOR EKRANI -->
+    <div id="loading-screen" class="absolute inset-0 z-50 bg-slate-50 flex flex-col items-center justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <p class="mt-4 text-slate-500 font-medium">Uygulama yükleniyor...</p>
+    </div>
+
+    <!-- ANA UYGULAMA (Başlangıçta Gizli) -->
+    <div id="app-container" class="hidden flex-col h-full">
+        
+        <!-- Üst Bilgi (Header) -->
+        <header class="bg-blue-700 text-white shadow-md pt-safe shrink-0">
+            <div class="px-4 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="briefcase" class="h-6 w-6 text-blue-200"></i>
+                    <h1 class="text-xl font-bold tracking-tight">Saha Asistanı</h1>
+                </div>
+                <div id="total-records-badge" class="text-xs font-medium bg-blue-800/50 px-2 py-1 rounded-full text-blue-100 border border-blue-600">
+                    0 Kayıt
+                </div>
+            </div>
+        </header>
+
+        <!-- Ana İçerik Alanı -->
+        <main class="flex-1 overflow-y-auto pb-24 relative">
+            
+            <!-- LİSTE SEKME İÇERİĞİ -->
+            <div id="tab-list" class="p-4 space-y-4 max-w-3xl mx-auto block">
+                
+                <!-- Arama Çubuğu -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="h-5 w-5 text-slate-400"></i>
+                    </div>
+                    <input
+                        type="text"
+                        id="search-input"
+                        class="block w-full pl-10 pr-10 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm transition-shadow"
+                        placeholder="Vaka No, Evrak veya Müşteri Ara..."
+                    >
+                    <button id="clear-search-btn" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <i data-lucide="x" class="h-5 w-5 text-slate-400 hover:text-slate-600"></i>
+                    </button>
+                </div>
+
+                <!-- Kayıtların Listeleneceği Konteyner -->
+                <div id="records-container" class="space-y-6">
+                    <!-- JavaScript ile doldurulacak -->
+                </div>
+            </div>
+
+            <!-- YENİ EKLE SEKME İÇERİĞİ -->
+            <div id="tab-add" class="p-4 max-w-3xl mx-auto hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-5 py-4 border-b border-slate-200">
+                        <h2 class="text-lg font-semibold text-slate-800 flex items-center">
+                            <i data-lucide="plus" class="h-5 w-5 mr-2 text-blue-600"></i>
+                            Yeni İş Kaydı
+                        </h2>
+                    </div>
+                    
+                    <form id="add-form" class="p-5 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Vaka Numarası</label>
+                                <input type="text" id="vakaNo" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Örn: VK-2023-1042">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Tarih</label>
+                                <input type="date" id="tarih" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Müşteri / Lokasyon</label>
+                            <input type="text" id="musteri" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Müşteri Adı veya Adres Özeti">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Yapılan İşlem / Açıklama</label>
+                            <textarea id="aciklama" required rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none" placeholder="Sahada yapılan işlemleri detaylandırın..."></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Evrak / Form No (Opsiyonel)</label>
+                                <input type="text" id="evrakNo" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Servis Formu veya İrsaliye No">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">İşlem Durumu</label>
+                                <select id="durum" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white">
+                                    <option value="Tamamlandı">Tamamlandı</option>
+                                    <option value="Devam Ediyor">Devam Ediyor</option>
+                                    <option value="Bekliyor">Parça/Onay Bekliyor</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-sm transition-all focus:ring-4 focus:ring-blue-200 flex justify-center items-center">
+                                <i data-lucide="check-circle" class="mr-2 h-5 w-5"></i> Kaydı Tamamla
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <!-- Alt Gezinme Çubuğu -->
+        <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 shrink-0">
+            <div class="flex justify-around">
+                <button id="nav-btn-list" class="flex-1 flex flex-col items-center py-3 px-2 transition-colors text-blue-600">
+                    <i data-lucide="calendar" class="h-6 w-6 mb-1 stroke-2"></i>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider">Günlük İşler</span>
+                </button>
+                
+                <button id="nav-btn-add" class="flex-1 flex flex-col items-center py-3 px-2 transition-colors text-slate-500 hover:text-slate-900">
+                    <i data-lucide="plus" class="h-6 w-6 mb-1 stroke-[1.5]"></i>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider">Yeni Ekle</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Firebase ve Uygulama Mantığı -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Başlatma ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // State Yönetimi
+        let currentUser = null;
+        let records = [];
+        let searchTerm = '';
+        let deletingId = null;
+
+        // DOM Elementleri
+        const ui = {
+            loadingScreen: document.getElementById('loading-screen'),
+            appContainer: document.getElementById('app-container'),
+            tabList: document.getElementById('tab-list'),
+            tabAdd: document.getElementById('tab-add'),
+            navBtnList: document.getElementById('nav-btn-list'),
+            navBtnAdd: document.getElementById('nav-btn-add'),
+            recordsContainer: document.getElementById('records-container'),
+            searchInput: document.getElementById('search-input'),
+            clearSearchBtn: document.getElementById('clear-search-btn'),
+            addForm: document.getElementById('add-form'),
+            submitBtn: document.getElementById('submit-btn'),
+            totalRecordsBadge: document.getElementById('total-records-badge'),
+            
+            // Form inputları
+            inpVaka: document.getElementById('vakaNo'),
+            inpTarih: document.getElementById('tarih'),
+            inpMusteri: document.getElementById('musteri'),
+            inpAciklama: document.getElementById('aciklama'),
+            inpEvrak: document.getElementById('evrakNo'),
+            inpDurum: document.getElementById('durum')
+        };
+
+        // İkonları oluştur
+        lucide.createIcons();
+        
+        // Form tarihini bugüne ayarla
+        ui.inpTarih.value = new Date().toISOString().split('T')[0];
+
+        // --- 1. Yetkilendirme ---
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Yetkilendirme hatası:", error);
+            }
+        };
+
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                ui.loadingScreen.classList.add('hidden');
+                ui.appContainer.classList.remove('hidden');
+                ui.appContainer.classList.add('flex');
+                fetchRecords();
+            }
+        });
+
+        // --- 2. Veri Çekme ---
+        function fetchRecords() {
+            if (!currentUser) return;
+            
+            const recordsRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'tasks');
+            
+            onSnapshot(recordsRef, (snapshot) => {
+                const data = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                records = data.sort((a, b) => b.createdAt - a.createdAt);
+                ui.totalRecordsBadge.textContent = `${records.length} Kayıt`;
+                renderRecords();
+            }, (error) => {
+                console.error("Veri çekme hatası:", error);
+            });
+        }
+
+        // --- 3. UI Yardımcı Fonksiyonları ---
+        function switchTab(tabName) {
+            if (tabName === 'list') {
+                ui.tabList.classList.remove('hidden');
+                ui.tabAdd.classList.add('hidden');
+                
+                // Navigasyon stilleri
+                ui.navBtnList.classList.add('text-blue-600');
+                ui.navBtnList.classList.remove('text-slate-500');
+                ui.navBtnList.querySelector('i').classList.replace('stroke-[1.5]', 'stroke-2');
+                
+                ui.navBtnAdd.classList.remove('text-blue-600');
+                ui.navBtnAdd.classList.add('text-slate-500');
+                ui.navBtnAdd.querySelector('i').classList.replace('stroke-2', 'stroke-[1.5]');
+                
+                // İkonları yenile (stroke değişikliği algılanması için)
+                lucide.createIcons();
+            } else {
+                ui.tabList.classList.add('hidden');
+                ui.tabAdd.classList.remove('hidden');
+                
+                ui.navBtnAdd.classList.add('text-blue-600');
+                ui.navBtnAdd.classList.remove('text-slate-500');
+                ui.navBtnAdd.querySelector('i').classList.replace('stroke-[1.5]', 'stroke-2');
+                
+                ui.navBtnList.classList.remove('text-blue-600');
+                ui.navBtnList.classList.add('text-slate-500');
+                ui.navBtnList.querySelector('i').classList.replace('stroke-2', 'stroke-[1.5]');
+                
+                lucide.createIcons();
+            }
+        }
+
+        function getStatusInfo(status) {
+            switch(status) {
+                case 'Tamamlandı': return { color: 'bg-emerald-100 text-emerald-800 border-emerald-200', icon: 'check-circle' };
+                case 'Devam Ediyor': return { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: 'activity' };
+                case 'Bekliyor': return { color: 'bg-amber-100 text-amber-800 border-amber-200', icon: 'clock' };
+                default: return { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: 'circle' };
+            }
+        }
+
+        function formatDateLabel(dateString) {
+            if (dateString === 'Tarihsiz') return dateString;
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            } catch {
+                return dateString;
+            }
+        }
+
+        // --- 4. Render (Çizdirme) Mantığı ---
+        function renderRecords() {
+            // Filtreleme
+            const filtered = records.filter(record => 
+                (record.vakaNo && record.vakaNo.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (record.evrakNo && record.evrakNo.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (record.musteri && record.musteri.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+
+            // Gruplama
+            const groups = {};
+            filtered.forEach(record => {
+                const date = record.tarih || 'Tarihsiz';
+                if (!groups[date]) groups[date] = [];
+                groups[date].push(record);
+            });
+
+            const groupedRecords = Object.keys(groups)
+                .sort((a, b) => new Date(b) - new Date(a))
+                .map(date => ({ date, records: groups[date] }));
+
+            // HTML Oluşturma
+            if (groupedRecords.length === 0) {
+                ui.recordsContainer.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-xl border border-slate-200 border-dashed">
+                        <i data-lucide="file-text" class="h-12 w-12 text-slate-300 mx-auto mb-3"></i>
+                        <h3 class="text-lg font-medium text-slate-900">Kayıt Bulunamadı</h3>
+                        <p class="text-slate-500 mt-1">${searchTerm ? 'Aramanıza uygun kayıt yok.' : 'Henüz hiç iş kaydetmediniz.'}</p>
+                        ${!searchTerm ? `<button onclick="document.getElementById('nav-btn-add').click()" class="mt-4 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium text-sm hover:bg-blue-100 transition-colors">İlk Kaydı Oluştur</button>` : ''}
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '';
+            groupedRecords.forEach(group => {
+                html += `
+                    <div class="space-y-3">
+                        <div class="sticky top-0 z-10 bg-slate-50/95 backdrop-blur py-2 border-b border-slate-200">
+                            <h2 class="text-sm font-bold text-slate-700 flex items-center">
+                                <i data-lucide="calendar" class="h-4 w-4 mr-2 text-blue-600"></i>
+                                ${formatDateLabel(group.date)}
+                                <span class="ml-2 text-xs font-normal text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">
+                                    ${group.records.length} İşlem
+                                </span>
+                            </h2>
+                        </div>
+                `;
+
+                group.records.forEach(record => {
+                    const statusInfo = getStatusInfo(record.durum);
+                    const timeString = new Date(record.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                    
+                    html += `
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                                            Vaka: ${record.vakaNo || 'Belirtilmedi'}
+                                        </span>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusInfo.color}">
+                                        <i data-lucide="${statusInfo.icon}" class="w-3.5 h-3.5 mr-1"></i>
+                                        ${record.durum}
+                                    </span>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-800 mb-1 flex items-center">
+                                    <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 mr-1.5"></i>
+                                    ${record.musteri || 'İsimsiz Müşteri/Lokasyon'}
+                                </h3>
+                                <p class="text-slate-600 text-sm mb-3 line-clamp-2">${record.aciklama}</p>
+                                <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100">
+                                    <div class="flex items-center text-xs text-slate-500">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i>
+                                        ${timeString}
+                                    </div>
+                                    ${record.evrakNo ? `
+                                    <div class="flex items-center text-xs text-slate-500 justify-end">
+                                        <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1.5"></i>
+                                        Evrak: ${record.evrakNo}
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-50 px-4 py-2 flex justify-end">
+                                ${deletingId === record.id ? `
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-xs text-slate-500 font-medium">Silinsin mi?</span>
+                                        <button data-action="cancel-delete" class="text-slate-500 hover:text-slate-700 text-xs font-medium px-2 py-1 rounded hover:bg-slate-200 transition-colors">İptal</button>
+                                        <button data-action="confirm-delete" data-id="${record.id}" class="text-white bg-red-500 hover:bg-red-600 text-xs font-medium px-2 py-1 rounded transition-colors">Evet, Sil</button>
+                                    </div>
+                                ` : `
+                                    <button data-action="request-delete" data-id="${record.id}" class="text-red-500 hover:text-red-700 flex items-center text-xs font-medium transition-colors">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1"></i> Sil
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            });
+
+            ui.recordsContainer.innerHTML = html;
+            lucide.createIcons(); // İkonları HTML içine yerleştir
+        }
+
+        // --- 5. Olay Dinleyicileri (Event Listeners) ---
+        
+        // Navigasyon geçişleri
+        ui.navBtnList.addEventListener('click', () => switchTab('list'));
+        ui.navBtnAdd.addEventListener('click', () => switchTab('add'));
+
+        // Arama işlemi
+        ui.searchInput.addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            if (searchTerm) {
+                ui.clearSearchBtn.classList.remove('hidden');
+            } else {
+                ui.clearSearchBtn.classList.add('hidden');
+            }
+            renderRecords();
+        });
+
+        ui.clearSearchBtn.addEventListener('click', () => {
+            ui.searchInput.value = '';
+            searchTerm = '';
+            ui.clearSearchBtn.classList.add('hidden');
+            renderRecords();
+        });
+
+        // Form Gönderme
+        ui.addForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+            
+            // Butonu yükleniyor durumuna al
+            const originalBtnHtml = ui.submitBtn.innerHTML;
+            ui.submitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>';
+            ui.submitBtn.disabled = true;
+
+            try {
+                const newId = Date.now().toString();
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'tasks', newId);
+                
+                await setDoc(docRef, {
+                    vakaNo: ui.inpVaka.value,
+                    tarih: ui.inpTarih.value,
+                    musteri: ui.inpMusteri.value,
+                    aciklama: ui.inpAciklama.value,
+                    evrakNo: ui.inpEvrak.value,
+                    durum: ui.inpDurum.value,
+                    createdAt: Date.now()
+                });
+
+                // Formu temizle ve listeye dön
+                ui.addForm.reset();
+                ui.inpTarih.value = new Date().toISOString().split('T')[0]; // Tarihi tekrar bugüne ayarla
+                switchTab('list');
+                
+            } catch (error) {
+                console.error("Kaydetme hatası:", error);
+                alert("Kaydedilirken bir hata oluştu.");
+            } finally {
+                ui.submitBtn.innerHTML = originalBtnHtml;
+                ui.submitBtn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+
+        // Silme İşlemleri (Event Delegation)
+        ui.recordsContainer.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            const action = btn.dataset.action;
+            const id = btn.dataset.id;
+
+            if (action === 'request-delete') {
+                deletingId = id;
+                renderRecords();
+            } else if (action === 'cancel-delete') {
+                deletingId = null;
+                renderRecords();
+            } else if (action === 'confirm-delete') {
+                if (!currentUser) return;
+                
+                btn.innerHTML = '<div class="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>';
+                
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'tasks', id));
+                    deletingId = null;
+                    // Not: renderRecords() çağırmaya gerek yok, onSnapshot veriyi güncelleyecektir.
+                } catch (error) {
+                    console.error("Silme hatası:", error);
+                    deletingId = null;
+                    renderRecords();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
