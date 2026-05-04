@@ -156,8 +156,35 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // ⚠️ DİKKAT: GITHUB PAGES İÇİN KENDİ FIREBASE AYARLARINI BURAYA YAPIŞTIRMALI SIN ⚠️
+        // Firebase'den aldığın ayarları aşağıdaki boş objenin içine yaz.
+        const myFirebaseConfig = {
+            apiKey: "AIzaSyCX0GKxsXcZ6jElpPeDydoAJZlsZcL2NJs",
+            authDomain: "teknofixsahatest.firebaseapp.com",
+            projectId: "teknofixsahatest",
+            storageBucket: "teknofixsahatest.firebasestorage.app",
+            messagingSenderId: "56598029133",
+            appId: "1:56598029133:web:3fed78e01fe7089c3c0d04",
+            measurementId: "G-ETB9EWG7Y5"
+        };
+
         // --- Firebase Başlatma ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const firebaseConfig = typeof __firebase_config !== 'undefined' && Object.keys(__firebase_config).length > 0 ? JSON.parse(__firebase_config) : myFirebaseConfig;
+        
+        // Eğer ayarlar boşsa yükleme ekranı yerine hata göster (Sonsuz dönmeyi engeller)
+        if (!firebaseConfig.apiKey) {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.innerHTML = `
+                <div class="text-center p-6 bg-red-50 rounded-xl border border-red-200 max-w-[90%] mx-auto shadow-sm">
+                    <i data-lucide="alert-triangle" class="h-12 w-12 text-red-500 mx-auto mb-3"></i>
+                    <h3 class="text-lg font-bold text-red-700 mb-2">Veritabanı Ayarları Eksik!</h3>
+                    <p class="text-sm text-red-600 mb-4">Uygulamanın Github Pages üzerinde çalışması için kodun içindeki <b>myFirebaseConfig</b> kısmına kendi Firebase ayarlarınızı yapıştırmalısınız.</p>
+                </div>
+            `;
+            lucide.createIcons();
+            throw new Error("Lütfen kendi Firebase ayarlarınızı myFirebaseConfig içerisine ekleyin.");
+        }
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
