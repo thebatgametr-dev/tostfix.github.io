@@ -132,29 +132,152 @@
                     </form>
                 </div>
             </div>
+
+            <!-- İADE MODEMLER SEKME İÇERİĞİ -->
+            <div id="tab-modems" class="p-4 max-w-3xl mx-auto hidden">
+                
+                <!-- Modem Ekleme Kartı -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+                    <div class="bg-slate-50 px-5 py-4 border-b border-slate-200">
+                        <h2 class="text-lg font-semibold text-slate-800 flex items-center">
+                            <i data-lucide="router" class="h-5 w-5 mr-2 text-indigo-600"></i>
+                            Vakaya Modem İşlemi Ekle
+                        </h2>
+                    </div>
+                    
+                    <form id="modem-form" class="p-5 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Kayıtlı Vaka Seçin</label>
+                            <select id="modem-vaka-id" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white">
+                                <option value="">Önce Vaka Seçin...</option>
+                                <!-- JS ile Doldurulacak -->
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Modem Seri No / Barkod</label>
+                                <input type="text" id="modem-seri" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Örn: S/N 123456789">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">İşlem Tipi</label>
+                                <select id="modem-tip" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white">
+                                    <option value="İade Alındı">İade Alındı (Müşteriden Alındı)</option>
+                                    <option value="Değişim Yapıldı">Değişim Yapıldı (Eskisi Alındı)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Link Ekleme Alanı -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Takip / Belge Linki (Opsiyonel)</label>
+                            <input type="text" id="modem-link" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Kargo veya Belge Linkini yapıştırın...">
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" id="modem-submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-xl shadow-sm transition-all focus:ring-4 focus:ring-indigo-200 flex justify-center items-center">
+                                <i data-lucide="save" class="mr-2 h-5 w-5"></i> Vakaya Modemi Ekle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Kaydedilen Modemler Listesi -->
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">İade/Değişim Alınanlar</h3>
+                    <span id="modem-count-badge" class="text-xs font-medium bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">0 Modem</span>
+                </div>
+                
+                <div id="modems-container" class="space-y-3">
+                    <!-- JS ile doldurulacak -->
+                </div>
+            </div>
         </main>
 
         <!-- Alt Gezinme Çubuğu -->
-        <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 shrink-0">
+        <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30 shrink-0">
             <div class="flex justify-around">
-                <button id="nav-btn-list" class="flex-1 flex flex-col items-center py-3 px-2 transition-colors text-blue-600">
+                <button id="nav-btn-list" class="flex-1 flex flex-col items-center py-3 px-1 transition-colors text-blue-600">
                     <i data-lucide="calendar" class="h-6 w-6 mb-1 stroke-2"></i>
-                    <span class="text-[10px] font-semibold uppercase tracking-wider">Günlük İşler</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-center">Günlük İşler</span>
                 </button>
                 
-                <button id="nav-btn-add" class="flex-1 flex flex-col items-center py-3 px-2 transition-colors text-slate-500 hover:text-slate-900">
+                <button id="nav-btn-add" class="flex-1 flex flex-col items-center py-3 px-1 transition-colors text-slate-500 hover:text-slate-900">
                     <i data-lucide="plus" class="h-6 w-6 mb-1 stroke-[1.5]"></i>
-                    <span class="text-[10px] font-semibold uppercase tracking-wider">Yeni Ekle</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-center">Yeni Ekle</span>
+                </button>
+
+                <!-- YENİ EKLENEN İADE MODEM BUTONU -->
+                <button id="nav-btn-modems" class="flex-1 flex flex-col items-center py-3 px-1 transition-colors text-slate-500 hover:text-slate-900">
+                    <i data-lucide="router" class="h-6 w-6 mb-1 stroke-[1.5]"></i>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-center">İade Modem</span>
                 </button>
             </div>
         </nav>
+    </div>
+
+    <!-- DÜZENLEME MODALI (YENİ EKLENDİ) -->
+    <div id="edit-modal" class="hidden fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden flex flex-col max-h-full">
+            <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-slate-800 flex items-center">
+                    <i data-lucide="edit-2" class="h-5 w-5 mr-2 text-blue-600"></i>
+                    Kaydı Düzenle
+                </h2>
+                <button id="cancel-edit-btn-top" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+            <div class="overflow-y-auto p-5">
+                <form id="edit-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Vaka Numarası</label>
+                            <input type="text" id="edit-vakaNo" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Tarih</label>
+                            <input type="date" id="edit-tarih" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Müşteri / Lokasyon</label>
+                        <input type="text" id="edit-musteri" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Yapılan İşlem / Açıklama</label>
+                        <textarea id="edit-aciklama" required rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Evrak / Form No</label>
+                            <input type="text" id="edit-evrakNo" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">İşlem Durumu</label>
+                            <select id="edit-durum" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <option value="Tamamlandı">Tamamlandı</option>
+                                <option value="Devam Ediyor">Devam Ediyor</option>
+                                <option value="Bekliyor">Parça/Onay Bekliyor</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex space-x-3">
+                        <button type="button" id="cancel-edit-btn" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-4 rounded-xl transition-colors">İptal</button>
+                        <button type="submit" id="edit-submit-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-sm transition-colors flex justify-center items-center">
+                            Güncelle
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase ve Uygulama Mantığı -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase Ayarları
         const myFirebaseConfig = {
@@ -178,28 +301,60 @@
         let records = [];
         let searchTerm = '';
         let deletingId = null;
+        let editingId = null; // DÜZENLEME İÇİN EKLENDİ
 
         // DOM Elementleri
         const ui = {
             loadingScreen: document.getElementById('loading-screen'),
             appContainer: document.getElementById('app-container'),
+            
+            // Sekmeler
             tabList: document.getElementById('tab-list'),
             tabAdd: document.getElementById('tab-add'),
+            tabModems: document.getElementById('tab-modems'),
+            
+            // Alt Butonlar
             navBtnList: document.getElementById('nav-btn-list'),
             navBtnAdd: document.getElementById('nav-btn-add'),
+            navBtnModems: document.getElementById('nav-btn-modems'),
+            
             recordsContainer: document.getElementById('records-container'),
             searchInput: document.getElementById('search-input'),
             clearSearchBtn: document.getElementById('clear-search-btn'),
-            addForm: document.getElementById('add-form'),
-            submitBtn: document.getElementById('submit-btn'),
             totalRecordsBadge: document.getElementById('total-records-badge'),
             
+            // Vaka Ekleme Formu
+            addForm: document.getElementById('add-form'),
+            submitBtn: document.getElementById('submit-btn'),
             inpVaka: document.getElementById('vakaNo'),
             inpTarih: document.getElementById('tarih'),
             inpMusteri: document.getElementById('musteri'),
             inpAciklama: document.getElementById('aciklama'),
             inpEvrak: document.getElementById('evrakNo'),
-            inpDurum: document.getElementById('durum')
+            inpDurum: document.getElementById('durum'),
+
+            // Modem Ekleme Formu & Listesi
+            modemsContainer: document.getElementById('modems-container'),
+            modemCountBadge: document.getElementById('modem-count-badge'),
+            modemForm: document.getElementById('modem-form'),
+            modemSubmitBtn: document.getElementById('modem-submit-btn'),
+            modemVakaSelect: document.getElementById('modem-vaka-id'),
+            modemSeri: document.getElementById('modem-seri'),
+            modemTip: document.getElementById('modem-tip'),
+            modemLink: document.getElementById('modem-link'),
+            
+            // DÜZENLEME MODALI DOM'LARI
+            editModal: document.getElementById('edit-modal'),
+            editForm: document.getElementById('edit-form'),
+            editVaka: document.getElementById('edit-vakaNo'),
+            editTarih: document.getElementById('edit-tarih'),
+            editMusteri: document.getElementById('edit-musteri'),
+            editAciklama: document.getElementById('edit-aciklama'),
+            editEvrak: document.getElementById('edit-evrakNo'),
+            editDurum: document.getElementById('edit-durum'),
+            editSubmitBtn: document.getElementById('edit-submit-btn'),
+            cancelEditBtn: document.getElementById('cancel-edit-btn'),
+            cancelEditBtnTop: document.getElementById('cancel-edit-btn-top')
         };
 
         lucide.createIcons();
@@ -236,11 +391,10 @@
             }
         });
 
-        // --- 2. Veri Çekme (ARTIK ORTAK HAVUZ KULLANIYOR) ---
+        // --- 2. Veri Çekme (ORTAK HAVUZ) ---
         function fetchRecords() {
             if (!currentUser) return;
             
-            // DİKKAT: 'users/uid/tasks' yerine tüm cihazlardan ulaşılan 'public/data/tasks' yaptık.
             const recordsRef = collection(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri');
             
             onSnapshot(recordsRef, (snapshot) => {
@@ -251,7 +405,11 @@
                 
                 records = data.sort((a, b) => b.createdAt - a.createdAt);
                 ui.totalRecordsBadge.textContent = `${records.length} Kayıt`;
+                
+                // Veri gelince tüm arayüzü güncelle
                 renderRecords();
+                populateModemSelect();
+                renderModems();
             }, (error) => {
                 console.error("Veri çekme hatası:", error);
                 alert("Veriler çekilemedi! Hata: " + error.message);
@@ -260,32 +418,43 @@
 
         // --- 3. UI Yardımcı Fonksiyonları ---
         function switchTab(tabName) {
-            if (tabName === 'list') {
-                ui.tabList.classList.remove('hidden');
-                ui.tabAdd.classList.add('hidden');
+            try {
+                const tabs = ['list', 'add', 'modems'];
                 
-                ui.navBtnList.classList.add('text-blue-600');
-                ui.navBtnList.classList.remove('text-slate-500');
-                const listIcon = ui.navBtnList.querySelector('svg, i');
-                if(listIcon) { listIcon.classList.remove('stroke-[1.5]'); listIcon.classList.add('stroke-2'); }
-                
-                ui.navBtnAdd.classList.remove('text-blue-600');
-                ui.navBtnAdd.classList.add('text-slate-500');
-                const addIcon = ui.navBtnAdd.querySelector('svg, i');
-                if(addIcon) { addIcon.classList.remove('stroke-2'); addIcon.classList.add('stroke-[1.5]'); }
-            } else {
-                ui.tabList.classList.add('hidden');
-                ui.tabAdd.classList.remove('hidden');
-                
-                ui.navBtnAdd.classList.add('text-blue-600');
-                ui.navBtnAdd.classList.remove('text-slate-500');
-                const addIcon = ui.navBtnAdd.querySelector('svg, i');
-                if(addIcon) { addIcon.classList.remove('stroke-[1.5]'); addIcon.classList.add('stroke-2'); }
-                
-                ui.navBtnList.classList.remove('text-blue-600');
-                ui.navBtnList.classList.add('text-slate-500');
-                const listIcon = ui.navBtnList.querySelector('svg, i');
-                if(listIcon) { listIcon.classList.remove('stroke-2'); listIcon.classList.add('stroke-[1.5]'); }
+                tabs.forEach(name => {
+                    const isTab = name === tabName;
+                    const tabEl = ui[`tab${name.charAt(0).toUpperCase() + name.slice(1)}`];
+                    const btnEl = ui[`navBtn${name.charAt(0).toUpperCase() + name.slice(1)}`];
+                    
+                    if (tabEl) {
+                        if (isTab) tabEl.classList.remove('hidden');
+                        else tabEl.classList.add('hidden');
+                    }
+                    
+                    if (btnEl) {
+                        const activeColor = name === 'modems' ? 'text-indigo-600' : 'text-blue-600';
+                        const icon = btnEl.querySelector('svg, i');
+                        
+                        if (isTab) {
+                            btnEl.classList.add(activeColor);
+                            btnEl.classList.remove('text-slate-500');
+                            if (icon) {
+                                icon.classList.remove('stroke-[1.5]');
+                                icon.classList.add('stroke-2');
+                            }
+                        } else {
+                            btnEl.classList.remove('text-blue-600', 'text-indigo-600');
+                            btnEl.classList.add('text-slate-500');
+                            if (icon) {
+                                icon.classList.remove('stroke-2');
+                                icon.classList.add('stroke-[1.5]');
+                            }
+                        }
+                    }
+                });
+                lucide.createIcons();
+            } catch (e) {
+                console.warn("Sekme ikon geçişi atlandı", e);
             }
         }
 
@@ -308,7 +477,79 @@
             }
         }
 
-        // --- 4. Render (Çizdirme) ---
+        // --- 4. MODEM SEKME FONKSİYONLARI ---
+        
+        function populateModemSelect() {
+            const optionsHtml = records
+                .filter(r => r.vakaNo) 
+                .map(r => {
+                    const islemYapilmis = r.iadeModemNo ? ' ✓ (Modem Kayıtlı)' : '';
+                    return `<option value="${r.id}">${r.vakaNo} - ${r.musteri} ${islemYapilmis}</option>`;
+                }).join('');
+            ui.modemVakaSelect.innerHTML = '<option value="">Önce Vaka Seçin...</option>' + optionsHtml;
+        }
+
+        function renderModems() {
+            const modemRecords = records.filter(r => r.iadeModemNo);
+            ui.modemCountBadge.textContent = `${modemRecords.length} Modem`;
+
+            if (modemRecords.length === 0) {
+                ui.modemsContainer.innerHTML = `
+                    <div class="text-center py-10 bg-white rounded-xl border border-slate-200 border-dashed">
+                        <i data-lucide="router" class="h-10 w-10 text-slate-300 mx-auto mb-3"></i>
+                        <h3 class="text-base font-medium text-slate-900">Modem İşlemi Yok</h3>
+                        <p class="text-sm text-slate-500 mt-1">Henüz hiçbir vakaya iade veya değişim modemi kaydetmediniz.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '';
+            modemRecords.forEach(record => {
+                const isIade = record.iadeModemTip === 'İade Alındı';
+                const tipColor = isIade ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                
+                html += `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${tipColor}">
+                                ${record.iadeModemTip}
+                            </span>
+                            <span class="text-xs text-slate-400 font-medium">${formatDateLabel(record.tarih)}</span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2 mb-2 bg-slate-50 p-2 rounded border border-slate-100">
+                            <i data-lucide="router" class="w-5 h-5 text-slate-500"></i>
+                            <span class="font-mono font-bold text-slate-800 text-sm tracking-wide">${record.iadeModemNo}</span>
+                        </div>
+                        
+                        ${record.iadeModemLink ? `
+                        <div class="mb-3">
+                            <a href="${record.iadeModemLink.startsWith('http') ? record.iadeModemLink : 'https://' + record.iadeModemLink}" target="_blank" class="inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded border border-indigo-200 transition-colors">
+                                <i data-lucide="external-link" class="w-3.5 h-3.5 mr-1.5"></i> Kayıtlı Linke Git
+                            </a>
+                        </div>
+                        ` : ''}
+                        
+                        <p class="text-xs text-slate-600 mb-3 flex items-center">
+                            <i data-lucide="briefcase" class="w-3.5 h-3.5 mr-1.5 text-slate-400"></i> 
+                            Vaka: ${record.vakaNo} - <span class="truncate ml-1 font-medium">${record.musteri}</span>
+                        </p>
+                        
+                        <div class="flex justify-end pt-2 border-t border-slate-100">
+                             <button data-action="remove-modem" data-id="${record.id}" class="text-red-500 hover:text-red-700 flex items-center text-xs font-medium transition-colors p-1 hover:bg-red-50 rounded">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1"></i> Modem Kaydını Sil
+                             </button>
+                        </div>
+                    </div>
+                `;
+            });
+            ui.modemsContainer.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // --- 5. Render (Ana Liste Çizdirme) ---
         function renderRecords() {
             const filtered = records.filter(record => 
                 (record.vakaNo && record.vakaNo.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -378,6 +619,21 @@
                                     ${record.musteri || 'İsimsiz Müşteri/Lokasyon'}
                                 </h3>
                                 <p class="text-slate-600 text-sm mb-3 line-clamp-2">${record.aciklama}</p>
+
+                                ${record.iadeModemNo ? `
+                                <div class="bg-indigo-50 rounded p-2 mb-3 border border-indigo-100 flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i data-lucide="router" class="w-4 h-4 text-indigo-500 mr-2"></i>
+                                        <span class="text-xs text-indigo-700 font-medium">${record.iadeModemTip}:</span>
+                                        <span class="text-xs font-mono font-bold text-slate-800 ml-1 bg-white px-1.5 py-0.5 rounded border border-indigo-200">${record.iadeModemNo}</span>
+                                    </div>
+                                    ${record.iadeModemLink ? `
+                                        <a href="${record.iadeModemLink.startsWith('http') ? record.iadeModemLink : 'https://' + record.iadeModemLink}" target="_blank" class="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700 transition-colors flex items-center">
+                                            Link <i data-lucide="external-link" class="w-3 h-3 ml-1"></i>
+                                        </a>
+                                    ` : ''}
+                                </div>` : ''}
+
                                 <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100">
                                     <div class="flex items-center text-xs text-slate-500">
                                         <i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i>
@@ -391,18 +647,24 @@
                                 </div>
                             </div>
                             
-                            <div class="bg-slate-50 px-4 py-2 flex justify-end">
-                                ${deletingId === record.id ? `
-                                    <div class="flex items-center space-x-3">
-                                        <span class="text-xs text-slate-500 font-medium">Silinsin mi?</span>
-                                        <button data-action="cancel-delete" class="text-slate-500 hover:text-slate-700 text-xs font-medium px-2 py-1 rounded hover:bg-slate-200 transition-colors">İptal</button>
-                                        <button data-action="confirm-delete" data-id="${record.id}" class="text-white bg-red-500 hover:bg-red-600 text-xs font-medium px-2 py-1 rounded transition-colors">Evet, Sil</button>
-                                    </div>
-                                ` : `
-                                    <button data-action="request-delete" data-id="${record.id}" class="text-red-500 hover:text-red-700 flex items-center text-xs font-medium transition-colors">
-                                        <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1"></i> Sil
-                                    </button>
-                                `}
+                            <div class="bg-slate-50 px-4 py-2 flex justify-between items-center border-t border-slate-100">
+                                <button data-action="edit-record" data-id="${record.id}" class="text-blue-600 hover:text-blue-800 flex items-center text-xs font-medium transition-colors px-2 py-1 rounded hover:bg-blue-50">
+                                    <i data-lucide="edit-2" class="w-3.5 h-3.5 mr-1"></i> Düzenle
+                                </button>
+                                
+                                <div>
+                                    ${deletingId === record.id ? `
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-xs text-slate-500 font-medium">Silinsin mi?</span>
+                                            <button data-action="cancel-delete" class="text-slate-500 hover:text-slate-700 text-xs font-medium px-2 py-1 rounded hover:bg-slate-200 transition-colors">İptal</button>
+                                            <button data-action="confirm-delete" data-id="${record.id}" class="text-white bg-red-500 hover:bg-red-600 text-xs font-medium px-2 py-1 rounded transition-colors">Evet, Sil</button>
+                                        </div>
+                                    ` : `
+                                        <button data-action="request-delete" data-id="${record.id}" class="text-red-500 hover:text-red-700 flex items-center text-xs font-medium transition-colors px-2 py-1 rounded hover:bg-red-50">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1"></i> Sil
+                                        </button>
+                                    `}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -414,9 +676,10 @@
             lucide.createIcons();
         }
 
-        // --- 5. Olay Dinleyicileri ---
+        // --- 6. Olay Dinleyicileri ---
         ui.navBtnList.addEventListener('click', () => switchTab('list'));
         ui.navBtnAdd.addEventListener('click', () => switchTab('add'));
+        ui.navBtnModems.addEventListener('click', () => switchTab('modems'));
 
         ui.searchInput.addEventListener('input', (e) => {
             searchTerm = e.target.value;
@@ -432,7 +695,45 @@
             renderRecords();
         });
 
-        // Form Gönderme
+        // Düzenleme Modalı Kapatma İşlemleri
+        const closeEditModal = () => {
+            ui.editModal.classList.add('hidden');
+            ui.editModal.classList.remove('flex');
+            editingId = null;
+        };
+        ui.cancelEditBtn.addEventListener('click', closeEditModal);
+        ui.cancelEditBtnTop.addEventListener('click', closeEditModal);
+
+        // Düzenleme Formunu Gönderme
+        ui.editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !editingId) return;
+
+            const originalBtnHtml = ui.editSubmitBtn.innerHTML;
+            ui.editSubmitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>';
+            ui.editSubmitBtn.disabled = true;
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri', editingId);
+                await updateDoc(docRef, {
+                    vakaNo: ui.editVaka.value,
+                    tarih: ui.editTarih.value,
+                    musteri: ui.editMusteri.value,
+                    aciklama: ui.editAciklama.value,
+                    evrakNo: ui.editEvrak.value,
+                    durum: ui.editDurum.value
+                });
+                closeEditModal();
+            } catch (error) {
+                console.error("Güncelleme hatası:", error);
+                alert("Güncellenemedi! Hata Detayı: " + error.message);
+            } finally {
+                ui.editSubmitBtn.innerHTML = originalBtnHtml;
+                ui.editSubmitBtn.disabled = false;
+            }
+        });
+
+        // Yeni Vaka Formu Gönderme
         ui.addForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
@@ -443,7 +744,6 @@
 
             try {
                 const newId = Date.now().toString();
-                // DİKKAT: Yeni "Ortak Havuz" kayıt yolumuz
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri', newId);
                 
                 await setDoc(docRef, {
@@ -454,7 +754,7 @@
                     evrakNo: ui.inpEvrak.value,
                     durum: ui.inpDurum.value,
                     createdAt: Date.now(),
-                    createdBy: currentUser.uid // Kimin eklediğini arka planda tutalım
+                    createdBy: currentUser.uid 
                 });
 
                 ui.addForm.reset();
@@ -463,11 +763,48 @@
                 
             } catch (error) {
                 console.error("Kaydetme hatası:", error);
-                // SADECE HATA DEĞİL, NEDENİNİ DE EKRANA BASIYORUZ
                 alert("Kaydedilemedi! Hata Detayı: " + error.message);
             } finally {
                 ui.submitBtn.innerHTML = originalBtnHtml;
                 ui.submitBtn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+
+        // Modem Formu Gönderme (Mevcut Vakayı Güncelleme)
+        ui.modemForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+            
+            const vakaId = ui.modemVakaSelect.value;
+            if (!vakaId) {
+                alert("Lütfen önce listeden bir vaka seçin!");
+                return;
+            }
+
+            const originalBtnHtml = ui.modemSubmitBtn.innerHTML;
+            ui.modemSubmitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>';
+            ui.modemSubmitBtn.disabled = true;
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri', vakaId);
+                
+                await updateDoc(docRef, {
+                    iadeModemNo: ui.modemSeri.value,
+                    iadeModemTip: ui.modemTip.value,
+                    iadeModemLink: ui.modemLink.value,
+                    modemAddedAt: Date.now()
+                });
+
+                ui.modemForm.reset();
+                alert("Modem başarıyla vakaya eklendi!");
+                
+            } catch (error) {
+                console.error("Modem kaydetme hatası:", error);
+                alert("Kaydedilemedi! Hata Detayı: " + error.message);
+            } finally {
+                ui.modemSubmitBtn.innerHTML = originalBtnHtml;
+                ui.modemSubmitBtn.disabled = false;
                 lucide.createIcons();
             }
         });
@@ -480,7 +817,21 @@
             const action = btn.dataset.action;
             const id = btn.dataset.id;
 
-            if (action === 'request-delete') {
+            if (action === 'edit-record') {
+                const recordToEdit = records.find(r => r.id === id);
+                if (recordToEdit) {
+                    editingId = id;
+                    ui.editVaka.value = recordToEdit.vakaNo || '';
+                    ui.editTarih.value = recordToEdit.tarih || '';
+                    ui.editMusteri.value = recordToEdit.musteri || '';
+                    ui.editAciklama.value = recordToEdit.aciklama || '';
+                    ui.editEvrak.value = recordToEdit.evrakNo || '';
+                    ui.editDurum.value = recordToEdit.durum || 'Tamamlandı';
+                    
+                    ui.editModal.classList.remove('hidden');
+                    ui.editModal.classList.add('flex');
+                }
+            } else if (action === 'request-delete') {
                 deletingId = id;
                 renderRecords();
             } else if (action === 'cancel-delete') {
@@ -490,7 +841,6 @@
                 if (!currentUser) return;
                 btn.innerHTML = '<div class="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>';
                 try {
-                    // DİKKAT: Ortak havuzdan siliyoruz
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri', id));
                     deletingId = null;
                 } catch (error) {
@@ -498,6 +848,35 @@
                     alert("Silinemedi! Hata: " + error.message);
                     deletingId = null;
                     renderRecords();
+                }
+            }
+        });
+
+        // Modem Kaydını Silme İşlemi (Vakayı silmez, sadece vakanın içindeki modemi siler)
+        ui.modemsContainer.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            if (btn.dataset.action === 'remove-modem') {
+                if (!currentUser) return;
+                
+                const onayla = confirm("Bu modemi vakadan kaldırmak istediğinize emin misiniz? (Vaka silinmez, sadece modem kaydı silinir)");
+                if (!onayla) return;
+
+                btn.innerHTML = '<div class="animate-spin rounded-full h-3 w-3 border-b-2 border-red-500 mx-auto"></div>';
+                
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'saha_gorevleri', btn.dataset.id);
+                    await updateDoc(docRef, {
+                        iadeModemNo: null,
+                        iadeModemTip: null,
+                        iadeModemLink: null,
+                        modemAddedAt: null
+                    });
+                } catch (error) {
+                    console.error("Modem silme hatası:", error);
+                    alert("Modem kaydı silinemedi! Hata: " + error.message);
+                    renderModems(); // Hata olursa listeyi geri yükle
                 }
             }
         });
