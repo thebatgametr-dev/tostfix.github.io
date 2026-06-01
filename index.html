@@ -120,6 +120,7 @@
                                     <option value="Tamamlandı">Tamamlandı</option>
                                     <option value="Devam Ediyor">Devam Ediyor</option>
                                     <option value="Bekliyor">Parça/Onay Bekliyor</option>
+                                    <option value="İptal">İptal (Lokasyonda)</option>
                                 </select>
                             </div>
                         </div>
@@ -259,6 +260,7 @@
                                 <option value="Tamamlandı">Tamamlandı</option>
                                 <option value="Devam Ediyor">Devam Ediyor</option>
                                 <option value="Bekliyor">Parça/Onay Bekliyor</option>
+                                <option value="İptal">İptal (Lokasyonda)</option>
                             </select>
                         </div>
                     </div>
@@ -404,7 +406,24 @@
                 }));
                 
                 records = data.sort((a, b) => b.createdAt - a.createdAt);
-                ui.totalRecordsBadge.textContent = `${records.length} Kayıt`;
+                
+                // Aylık Aktif/Pasif Hesaplama
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                let aktifCount = 0;
+                let pasifCount = 0;
+
+                records.forEach(r => {
+                    if (r.tarih && r.tarih !== 'Tarihsiz') {
+                        const rDate = new Date(r.tarih);
+                        if (rDate.getMonth() === currentMonth && rDate.getFullYear() === currentYear) {
+                            if (r.durum === 'Tamamlandı') aktifCount++;
+                            if (r.durum === 'İptal') pasifCount++;
+                        }
+                    }
+                });
+
+                ui.totalRecordsBadge.innerHTML = `Aylık: <span class="text-emerald-300 font-bold ml-1">${aktifCount} Aktif</span> <span class="mx-1 text-blue-400/50">|</span> <span class="text-red-300 font-bold">${pasifCount} Pasif</span>`;
                 
                 // Veri gelince tüm arayüzü güncelle
                 renderRecords();
@@ -463,6 +482,7 @@
                 case 'Tamamlandı': return { color: 'bg-emerald-100 text-emerald-800 border-emerald-200', icon: 'check-circle' };
                 case 'Devam Ediyor': return { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: 'activity' };
                 case 'Bekliyor': return { color: 'bg-amber-100 text-amber-800 border-amber-200', icon: 'clock' };
+                case 'İptal': return { color: 'bg-red-100 text-red-800 border-red-200', icon: 'x-circle' };
                 default: return { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: 'circle' };
             }
         }
@@ -600,12 +620,21 @@
                     const statusInfo = getStatusInfo(record.durum);
                     const timeString = new Date(record.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
                     
+                    // İptal edilen kayıtlar için özel kırmızı tasarım kontrolü
+                    const isIptal = record.durum === 'İptal';
+                    const cardBg = isIptal ? 'bg-red-50/50' : 'bg-white';
+                    const cardBorder = isIptal ? 'border-red-200' : 'border-slate-200';
+                    const footerBg = isIptal ? 'bg-red-50' : 'bg-slate-50';
+                    const footerBorder = isIptal ? 'border-red-100' : 'border-slate-100';
+                    const textColor = isIptal ? 'text-red-900' : 'text-slate-800';
+                    const descColor = isIptal ? 'text-red-700' : 'text-slate-600';
+                    
                     html += `
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md">
+                        <div class="${cardBg} rounded-xl shadow-sm border ${cardBorder} overflow-hidden transition-all hover:shadow-md">
                             <div class="p-4">
                                 <div class="flex justify-between items-start mb-2">
                                     <div class="flex items-center space-x-2">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold ${isIptal ? 'bg-red-100 text-red-800 border-red-200' : 'bg-slate-100 text-slate-800 border-slate-200'} border">
                                             Vaka: ${record.vakaNo || 'Belirtilmedi'}
                                         </span>
                                     </div>
@@ -614,11 +643,11 @@
                                         ${record.durum}
                                     </span>
                                 </div>
-                                <h3 class="text-lg font-bold text-slate-800 mb-1 flex items-center">
-                                    <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 mr-1.5"></i>
+                                <h3 class="text-lg font-bold ${textColor} mb-1 flex items-center">
+                                    <i data-lucide="map-pin" class="w-4 h-4 ${isIptal ? 'text-red-400' : 'text-slate-400'} mr-1.5"></i>
                                     ${record.musteri || 'İsimsiz Müşteri/Lokasyon'}
                                 </h3>
-                                <p class="text-slate-600 text-sm mb-3 line-clamp-2">${record.aciklama}</p>
+                                <p class="${descColor} text-sm mb-3 line-clamp-2">${record.aciklama}</p>
 
                                 ${record.iadeModemNo ? `
                                 <div class="bg-indigo-50 rounded p-2 mb-3 border border-indigo-100 flex items-center justify-between">
@@ -634,7 +663,7 @@
                                     ` : ''}
                                 </div>` : ''}
 
-                                <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100">
+                                <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t ${footerBorder}">
                                     <div class="flex items-center text-xs text-slate-500">
                                         <i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i>
                                         ${timeString}
@@ -647,7 +676,7 @@
                                 </div>
                             </div>
                             
-                            <div class="bg-slate-50 px-4 py-2 flex justify-between items-center border-t border-slate-100">
+                            <div class="${footerBg} px-4 py-2 flex justify-between items-center border-t ${footerBorder}">
                                 <button data-action="edit-record" data-id="${record.id}" class="text-blue-600 hover:text-blue-800 flex items-center text-xs font-medium transition-colors px-2 py-1 rounded hover:bg-blue-50">
                                     <i data-lucide="edit-2" class="w-3.5 h-3.5 mr-1"></i> Düzenle
                                 </button>
